@@ -36,8 +36,6 @@ while running:
         start, end = hand.coords
         pygame.draw.line(screen, 'white', start, end, hand.thickness)
 
-    t = time.time()
-
     # flip() the display to put your work on screen
     pygame.display.flip()
 

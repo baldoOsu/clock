@@ -46,13 +46,7 @@ class Clock:
         dt = datetime.now()
         
         hand_types = ['second', 'minute', 'hour']
-        hands = []
-
-        for ht in hand_types:
-            hands.append(self._get_hand(dt, ht))
-
-        return hands
-
+        return [self._get_hand(dt, ht) for ht in hand_types]
 
     def _get_hand(self, time, hand_type) -> Line:
         t = getattr(time, hand_type)
