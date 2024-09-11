@@ -1,19 +1,25 @@
 from structs import Line
-from math import cos, sin, pi
+from math import cos, sin, pi, prod
 from datetime import datetime
 
 class Clock:
-    _hand_thicknesses = {
+    hand_types = ['hour', 'minute', 'second']
+    ht_max_values = [12, 60, 60] # max values on the clock
+
+    hand_thicknesses = {
         'second': 2,
         'minute': 5,
-        'hour': 5
+        'hour': 10
     }
 
-    _hand_length_scales = {
+    hand_length_scales = {
         'second': 0.85,
         'minute': 0.85,
         'hour': 0.4
     }
+
+    # a list of time values: [second, minute, hour]
+    _current_times = [0, 0, 0]
 
     def __init__(self, pos, radius):
         self.pos = pos
@@ -44,26 +50,36 @@ class Clock:
 
     def get_clock_hands(self) -> list[Line]:
         dt = datetime.now()
-        
-        hand_types = ['second', 'minute', 'hour']
-        return [self._get_hand(dt, ht) for ht in hand_types]
+        hands = []
 
-    def _get_hand(self, time, hand_type) -> Line:
-        t = getattr(time, hand_type)
-        a = None
+        self._current_times = [getattr(dt, ht) if i != 0 else getattr(dt, ht) % 12 for i, ht in enumerate(self.hand_types)]
 
-        if hand_type in ['second', 'minute']:
-            a = pi * t / (30) - pi / 2
-        else:
-            a = pi * (t % 12) / (6) - pi / 2
+        return [self._get_hand(i) for i in range(len(self.hand_types))]
 
-        r = self.radius * self._hand_length_scales[hand_type]
+    def _get_hand(self, ht_idx) -> Line:
+        hand_type = self.hand_types[ht_idx]
+        fractions = []
+
+        n_scaled = 0
+        for i, time in enumerate(self._current_times):
+            if i < ht_idx:
+                continue
+
+            frac = time / prod(self.ht_max_values[3-n_scaled:])
+
+            fractions.append(frac)
+            n_scaled += 1
+
+        frac_summed = 2 * sum(fractions) / self.ht_max_values[ht_idx]
+
+        a = pi * frac_summed - pi / 2
+        r = self.radius * self.hand_length_scales[hand_type]
 
         c = self._polar_to_cartesian(r, a)
         x1, y1 = self.pos
         x2, y2 = self._add_tuples(c, self.pos)
 
-        return Line(x1, y1, x2, y2, self._hand_thicknesses[hand_type])
+        return Line(x1, y1, x2, y2, self.hand_thicknesses[hand_type])
 
 
     def _polar_to_cartesian(self, r, a):
