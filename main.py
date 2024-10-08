@@ -8,6 +8,7 @@ CLOCK_RADIUS = 650
 
 # pygame setup
 pygame.init()
+pygame.display.set_caption("Fantastic Clock")
 screen = pygame.display.set_mode(DISPLAY_SIZE)
 
 clock = Clock(DISPLAY_MIDDLE, CLOCK_RADIUS)
